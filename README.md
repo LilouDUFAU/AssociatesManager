@@ -155,7 +155,7 @@ Les contributions sont les bienvenues ! Pour contribuer :
 - Inclure les traductions FR
 
 ## 📝 Changelog
-Consulter le fichier [CHANGELOG.md](./CHANGELOG.MD)
+Consulter le fichier [CHANGELOG.md](./CHANGELOG.md)
 
 ## 🐛 Signaler un bug
 
