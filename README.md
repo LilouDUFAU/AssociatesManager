@@ -5,24 +5,26 @@
 [![License](https://img.shields.io/badge/License-GPLv2+-red.svg)](https://www.gnu.org/licenses/gpl-2.0.html)
 [![Status](https://img.shields.io/badge/Status-Stable-brightgreen.svg)]()
 
-Le **Plugin Associates Manager** est un plugin avancé pour GLPI qui permet une gestion des associés liés aux fournisseurs. Il offre un suivi précis des parts sociales, une historisation des modifications, et s’intègre dans le menu **Gestion** sans créer de menu supplémentaire.
+
+Le **Plugin Associates Manager** est un plugin avancé pour GLPI (v10.0+ recommandé) permettant la gestion complète des associés liés aux fournisseurs, le suivi des parts sociales, l'historique des modifications, et l'intégration native dans le menu **Administration**.
+
 
 ### ✨ Fonctionnalités principales
+- Gestion des associés (personnes ou sociétés) liés à un fournisseur
+- Gestion des parts sociales et historique d'attribution
+- Liaison automatique avec les contacts GLPI pour les personnes physiques
+- CRUD complet pour associés, parts, historique
+- Redirections et confirmations visuelles après chaque action
+- Droits fins par profils GLPI (lecture, création, modification, suppression)
+- Support multilingue (français)
 
-- **🔗 Liaison d’un associé à un fournisseur GLPI** 
-- **📊 Suivi du nombre total de parts par fournisseur**
-- **🕓 Historisation des parts par associé**
-- **👤 Sélection d’un contact GLPI si l’associé est une personne physique**
-- **🛡️ Intégration avec le système de droits du plugin de gestion des permissions**
 
 ## 📦 Installation
 
 ### Prérequis
-
-- GLPI 10.0.19 ou supérieur
-- PHP 7.4 ou supérieur  
-- MySQL 5.7 ou supérieur
-- Plugin [PluginRightsManager](https://github.com/LilouDUFAU/PluginRightsManager) installé et activé
+- GLPI 10.0+ recommandé
+- PHP 7.4+ (ou 8.1+ selon version GLPI)
+- MySQL 5.7+ ou MariaDB
 
 ### Méthode 1 : Installation depuis GitHub
 
@@ -42,96 +44,73 @@ chmod -R 755 associatesmanager
 
 1. Connectez-vous à GLPI avec un compte super-administrateur
 2. Allez dans **Configuration → Plugins**
-3. Trouvez "Gestion Associés" et cliquez sur **Installer**
-4. Cliquez sur **Activer**
-
-## 🔐 Permissions
-
-Ce plugin utilise le système de droits du plugin PluginRightsManager. Les utilisateurs doivent disposer du droit gestion_associés_access pour accéder aux fonctionnalités.
-
-Exemple de vérification dans le code :
-```php
-if (!PluginPluginrightsmanagerRightsValidator::hasPluginAccess(Session::getLoginUserID(), 'gestion_associés', 'read')) {
-   Html::displayRightError();
-}
-```
-
-## 🚀 Utilisation
-### Accès au plugin
-
-Le plugin est accessible via : **Gestion → Associates Manager**
-
-> ⚠️ **Important** : Seuls les utilisateurs ayant le droit **access** peuvent accéder au plugin.
+3. Installer le plugin puis l'activer
+4. Vous trouverez le plugin dans le menu `Administration`
 
 ### Gestion des associés
 #### 1. Vue d'ensemble des associés
 - Liste des associés avec recherche par nom ou fournisseur
 - Affichage des informations principales : nom, fournisseur, nombre de parts
-- Boutons : **Voir plus**, **Modifier**, **Supprimer**
 
-
-
+### Base de données
+Le plugin crée 3 tables principales :
+- `glpi_plugin_associatesmanager_associates` : Informations sur les associés
+- `glpi_plugin_associatesmanager_parts` : Définition des types de parts
+- `glpi_plugin_associatesmanager_partshistory` : Historique des attributions de parts
 
 #### 2. Types d'associés possibles
 
 | Droit | Description |
 |-------|-------------|
-| **Personne** | Associé lié à un contact GLPI |
-| **Autre** | Associé non lié à un contact GLPI |
+| **Personne physique** | Associé lié à un contact GLPI |
+| **Autre** | Associé non lié à un contact GLPI (ex. entreprise) |
 
 ## 🏗️ Architecture
 
 ### Structure des fichiers
 ```
-📁 pluginrightsmanager/
-├── 📄 setup.php
+📁 associatesmanager/
+├── 📄 AUTHORS.txt
+├── 📄 CHANGELOG.md              → changement par version
 ├── 📄 hook.php
-├── 📄 README.md
-├── 📁 inc/
-│   ├── 📄 plugin_associatesmanager_associe.class.php
-│   ├── 📄 plugin_associatesmanager_associefournisseur.class.php
-│   ├── 📄 plugin_associatesmanager_associepart.class.php
+├── 📄 INSTALL.md                → guide installation
+├── 📄 README.md                 → ce que vous êtes en train de lire
+├── 📄 setup.php
+├── 📄 USER_GUIDE.md             → guide utilisateur 
 ├── 📁 front/
-│   ├── 📄 associe.form.php
-│   ├── 📄 associefournisseur.form.php
-│   ├── 📄 associepart.form.php
-├── 📁 ajax/
-│   ├── 📄 associatesmanager.ajax.php
-├── 📁 css/
-│   └── 📄 associatesmanager.css
-├── 📁 js/
-│   └── 📄 associatesmanager.js
-└── 📁 locales/
-    ├── 📄 fr_FR.php
-    └── 📄 en_GB.php
+│   ├── 📄 associate.form.php
+│   ├── 📄 associate.php
+│   ├── 📄 config.form.php
+│   ├── 📄 part.form.php
+│   ├── 📄 part.php
+│   ├── 📄 partshistory.form.php
+│   └── 📄 partshistory.php
+├── 📁 inc/
+│   ├── 📄 associate.class.php
+│   ├── 📄 config.class.php
+│   ├── 📄 menu.class.php
+│   ├── 📄 part.class.php
+│   └── 📄 partshistory.class.php
+└── 📁 locale/
+   └── 📄 fr_FR.po
 ```
 
-### Base de données
 
-Le plugin crée 3 tables :
-- `glpi_plugin_associatesmanager_associes` : Informations sur les associés
-- `glpi_plugin_associatesmanager_associefournisseurs` : Lien entre associé et fournisseur
-- `glpi_plugin_associatesmanager_associeparts` : Historique des parts par associé
 
 ## 🧠 Concepts clés
 - **Modularité** : chaque entité est gérée via une classe dédiée
 - **Historisation** : chaque modification de parts est enregistrée
-- **Sécurité** : accès contrôlé via PluginRightsManager
-- **Interopérabilité GLPI** : lien avec les contacts GLPI pour les personne physiques
+- **Interopérabilité GLPI** : lien avec les contacts GLPI pour les personne physiques et avec les fournisseurs (pour lier fournisseur et associés)
 
 ## 📚 Documentation développeur
 ### Hooks disponibles
-- `plugin_init_associatesmanager()`
-- `plugin_associatesmanager_install()`
-- `plugin_associatesmanager_uninstall()`
+```php
+// faire
+```
 
 ### Exemple de création d’un associé
 ```php
-$associe = new PluginAssociatesmanagerAssocie();
-$associe->fields['name'] = 'Jean Dupont';
-$associe->fields['is_person'] = 1;
-$associe->fields['contact_id'] = 42;
-$associe->add();
+// faire
 ```
 
 ## 📈 Roadmap
@@ -141,19 +120,14 @@ $associe->add();
 - 🔔 Notifications sur modification de parts
 - 🧩 Compatibilité avec d’autres plugins GLPI
 
-## 🛠️ Dépannage
-
-### Problèmes courants
-**Plugin non visible dans le menu**
-- Vérifiez que votre profil utilisateur à le droit d'accès au plugin
+En cas de problème :
+- Vérifiez les logs GLPI : `files/_log/`
+- Vérifiez les permissions sur le dossier du plugin et le cache GLPI
+- Videz le cache GLPI si besoin
+- Consultez la documentation GLPI officielle
 - Confirmez que le plugin est activé
 
-**Erreurs JavaScript**
-- Vérifiez la console navigateur
-- Assurez-vous que jQuery est chargé
-
 **Problèmes de droits**
-- Vérifiez la table `glpi_plugin_pluginrightsmanager_rights`
 - Testez avec un compte ayant tous les droits
 
 ### Logs
@@ -175,19 +149,13 @@ Les contributions sont les bienvenues ! Pour contribuer :
 5. **Ouvrez** une Pull Request
 
 ### Standards de code
-
 - Respecter les conventions de codage GLPI
 - Documenter les nouvelles fonctions
 - Tester les modifications avant soumission
-- Inclure les traductions FR/EN
+- Inclure les traductions FR
 
 ## 📝 Changelog
-
-### Version 1.0.0
-- ✨ Première version stable
-- 🔗 Liaison associés/fournisseurs
-- 📊 Suivi et historisation des parts
-- 🔐 Intégration PluginRightsManager
+Consulter le fichier [CHANGELOG.md](./CHANGELOG.MD)
 
 ## 🐛 Signaler un bug
 
@@ -207,7 +175,7 @@ Ce projet est sous licence **GPL v2+** - voir le fichier [LICENSE](LICENSE) pour
 
 ## 👨‍💻 Auteur
 
-**Lilou DUFAU** - [Votre GitHub](https://github.com/LilouDUFAU)
+**Lilou DUFAU** - [Lilou DUFAU](https://github.com/LilouDUFAU)
 
 ## 🙏 Remerciements
 
