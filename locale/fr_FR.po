@@ -1,0 +1,130 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: GLPI Plugin - Associates Manager\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-10-20 10:00+0000\n"
+"PO-Revision-Date: 2025-10-20 10:00+0000\n"
+"Last-Translator: \n"
+"Language-Team: French\n"
+"Language: fr_FR\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+msgid "Associates Manager"
+msgstr "Gestionnaire d'Associés"
+
+msgid "Associate"
+msgid_plural "Associates"
+msgstr[0] "Associé"
+msgstr[1] "Associés"
+
+msgid "Part"
+msgid_plural "Parts"
+msgstr[0] "Part"
+msgstr[1] "Parts"
+
+msgid "Parts History"
+msgstr "Historique des Parts"
+
+msgid "Configuration"
+msgstr "Configuration"
+
+msgid "Type"
+msgstr "Type"
+
+msgid "Person"
+msgstr "Personne"
+
+msgid "Company"
+msgstr "Société"
+
+msgid "Label"
+msgstr "Libellé"
+
+msgid "Value"
+msgstr "Valeur"
+
+msgid "Number of parts"
+msgstr "Nombre de parts"
+
+msgid "Unit Value"
+msgstr "Valeur unitaire"
+
+msgid "Total Value"
+msgstr "Valeur totale"
+
+msgid "Attribution Date"
+msgstr "Date d'attribution"
+
+msgid "End Date"
+msgstr "Date de fin"
+
+msgid "Total"
+msgstr "Total"
+
+msgid "Add an associate"
+msgstr "Ajouter un associé"
+
+msgid "Add a parts entry"
+msgstr "Ajouter une entrée de parts"
+
+msgid "No associate found"
+msgstr "Aucun associé trouvé"
+
+msgid "No parts history found"
+msgstr "Aucun historique de parts trouvé"
+
+msgid "Name is mandatory"
+msgstr "Le nom est obligatoire"
+
+msgid "Supplier is mandatory"
+msgstr "Le fournisseur est obligatoire"
+
+msgid "Label is mandatory"
+msgstr "Le libellé est obligatoire"
+
+msgid "Value is mandatory"
+msgstr "La valeur est obligatoire"
+
+msgid "Associate is mandatory"
+msgstr "L'associé est obligatoire"
+
+msgid "Part is mandatory"
+msgstr "La part est obligatoire"
+
+msgid "Number of parts is mandatory"
+msgstr "Le nombre de parts est obligatoire"
+
+msgid "Attribution date is mandatory"
+msgstr "La date d'attribution est obligatoire"
+
+msgid "Associates Manager Configuration"
+msgstr "Configuration du Gestionnaire d'Associés"
+
+msgid "Rights Management"
+msgstr "Gestion des Droits"
+
+msgid "Manage plugin rights through GLPI profiles (Administration > Profiles)"
+msgstr "Gérez les droits du plugin via les profils GLPI (Administration > Profils)"
+
+msgid "Available rights:"
+msgstr "Droits disponibles :"
+
+msgid "View associates, parts and history"
+msgstr "Voir les associés, parts et historique"
+
+msgid "Add new associates, parts and history entries"
+msgstr "Ajouter de nouveaux associés, parts et entrées d'historique"
+
+msgid "Modify existing associates, parts and history"
+msgstr "Modifier les associés, parts et historique existants"
+
+msgid "Remove associates, parts and history"
+msgstr "Supprimer les associés, parts et historique"
