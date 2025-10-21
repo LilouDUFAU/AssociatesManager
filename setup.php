@@ -2,7 +2,6 @@
 
 define('PLUGIN_ASSOCIATESMANAGER_VERSION', '1.0.5');
 define('PLUGIN_ASSOCIATESMANAGER_MIN_GLPI', '10.0.0');
-define('PLUGIN_ASSOCIATESMANAGER_MAX_GLPI', '11.99.99');
 
 // Autoloader for plugin classes
 spl_autoload_register(function ($classname) {
@@ -57,16 +56,14 @@ function plugin_version_associatesmanager() {
       'requirements'   => [
          'glpi' => [
             'min' => PLUGIN_ASSOCIATESMANAGER_MIN_GLPI,
-            'max' => PLUGIN_ASSOCIATESMANAGER_MAX_GLPI
          ]
       ]
    ];
 }
 
 function plugin_associatesmanager_check_prerequisites() {
-   if (version_compare(GLPI_VERSION, PLUGIN_ASSOCIATESMANAGER_MIN_GLPI, 'lt')
-       || version_compare(GLPI_VERSION, PLUGIN_ASSOCIATESMANAGER_MAX_GLPI, 'gt')) {
-      echo "This plugin requires GLPI >= " . PLUGIN_ASSOCIATESMANAGER_MIN_GLPI . " and < " . PLUGIN_ASSOCIATESMANAGER_MAX_GLPI;
+   if (version_compare(GLPI_VERSION, PLUGIN_ASSOCIATESMANAGER_MIN_GLPI, 'lt')) {
+      echo "This plugin requires GLPI >= " . PLUGIN_ASSOCIATESMANAGER_MIN_GLPI;
       return false;
    }
    return true;
