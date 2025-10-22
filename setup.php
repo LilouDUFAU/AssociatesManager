@@ -1,6 +1,6 @@
 <?php
 
-define('PLUGIN_ASSOCIATESMANAGER_VERSION', '1.0.5');
+define('PLUGIN_ASSOCIATESMANAGER_VERSION', '1.0.6');
 define('PLUGIN_ASSOCIATESMANAGER_MIN_GLPI', '10.0.0');
 
 // Autoloader for plugin classes
@@ -51,7 +51,7 @@ function plugin_version_associatesmanager() {
       'name'           => __('Associates Manager', 'associatesmanager'),
       'version'        => PLUGIN_ASSOCIATESMANAGER_VERSION,
       'author'         => 'Lilou DUFAU',
-      'license'        => 'GPLv3+',
+      'license'        => 'GPLv2+',
       'homepage'       => '',
       'requirements'   => [
          'glpi' => [
