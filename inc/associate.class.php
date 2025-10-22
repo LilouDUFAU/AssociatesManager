@@ -50,6 +50,12 @@ class PluginAssociatesmanagerAssociate extends CommonDBTM {
          echo __('Add an associate', 'associatesmanager');
          echo "</a>";
          echo "</div>";
+
+         echo "<div class='center firstbloc'>";
+         echo "<a class='btn btn-primary' href='" . Plugin::getWebDir('associatesmanager') . "/front/parts.form.php?suppliers_id=$supplier_id'>";
+         echo __('Add a part', 'associatesmanager');
+         echo "</a>";
+         echo "</div>";
       }
 
       echo "<div class='center'>";
@@ -209,8 +215,7 @@ class PluginAssociatesmanagerAssociate extends CommonDBTM {
             'postcode'    => $this->fields['postcode'],
             'town'        => $this->fields['town'],
             'state'       => $this->fields['state'],
-            'country'     => $this->fields['country'],
-            'entities_id' => isset($this->fields['entities_id']) ? $this->fields['entities_id'] : (isset($_SESSION['glpiactive_entity']) ? $_SESSION['glpiactive_entity'] : 0)
+            'country'     => $this->fields['country']
          ];
 
          $contact_id = $contact->add($contact_data);
@@ -228,6 +233,39 @@ class PluginAssociatesmanagerAssociate extends CommonDBTM {
             ]);
          }
       }
+   }
+
+   static function dropdown($options = []) {
+      global $DB, $CFG_GLPI;
+
+      $p = [
+         'name'     => 'plugin_associatesmanager_associates_id',
+         'value'    => 0,
+         'comments' => true,
+         'entity'   => -1,
+         'entity_sons' => false,
+         'on_change' => '',
+         'width'    => '',
+      ];
+
+      if (is_array($options) && count($options)) {
+         foreach ($options as $key => $val) {
+            $p[$key] = $val;
+         }
+      }
+
+      $iterator = $DB->request([
+         'SELECT' => ['id', 'name'],
+         'FROM'   => 'glpi_plugin_associatesmanager_associates',
+         'ORDER'  => 'name'
+      ]);
+
+      $values = [0 => Dropdown::EMPTY_VALUE];
+      foreach ($iterator as $data) {
+         $values[$data['id']] = $data['name'];
+      }
+
+      return Dropdown::showFromArray($p['name'], $values, $p);
    }
 
    function rawSearchOptions() {
@@ -275,96 +313,5 @@ class PluginAssociatesmanagerAssociate extends CommonDBTM {
       ];
 
       return $tab;
-   }
-
-   /**
-    * Render the full list of associates with specific columns and actions
-    * Columns: Name, Email, Phone, Type, Actions
-    */
-   static function showList(): void {
-      global $DB;
-
-      $can_update = Session::haveRight(self::$rightname, UPDATE);
-      $can_delete = Session::haveRight(self::$rightname, DELETE);
-
-      echo "<div class='center'>";
-
-      $iterator = $DB->request([
-         'FROM'  => 'glpi_plugin_associatesmanager_associates',
-         'ORDER' => 'name'
-      ]);
-
-      echo "<table class='tab_cadre_fixehov'>";
-      echo "<tr class='noHover'><th colspan='5'>" . self::getTypeName(count($iterator)) . "</th></tr>";
-      echo "<tr>";
-      echo "<th>" . __('Name') . "</th>";
-      echo "<th>" . __('Email') . "</th>";
-      echo "<th>" . __('Phone') . "</th>";
-      echo "<th>" . __('Type', 'associatesmanager') . "</th>";
-      echo "<th>" . __('Actions') . "</th>";
-      echo "</tr>";
-
-      if (count($iterator)) {
-         foreach ($iterator as $data) {
-            $edit_url = Plugin::getWebDir('associatesmanager') . "/front/associate.form.php?id=" . (int)$data['id'];
-
-            echo "<tr class='tab_bg_1'>";
-            // Name with link to edit form
-            echo "<td><a href='" . $edit_url . "'>" . Html::entities_deep($data['name']) . "</a></td>";
-            echo "<td>" . Html::entities_deep($data['email']) . "</td>";
-            echo "<td>" . Html::entities_deep($data['phonenumber']) . "</td>";
-            echo "<td>" . ($data['is_person'] ? __('Person', 'associatesmanager') : __('Company', 'associatesmanager')) . "</td>";
-
-            // Actions
-            echo "<td>";
-            // Edit action
-            if ($can_update) {
-               echo "<a class='me-2' href='" . $edit_url . "' title='" . __('Edit') . "'>";
-               echo "<i class='fas fa-edit'></i>";
-               echo "</a>";
-            } else {
-               echo "<span class='me-2' title='" . __('Edit') . "' style='opacity:.4; cursor:not-allowed'><i class='fas fa-edit'></i></span>";
-            }
-
-            // Delete action: link to form page (user will confirm/delete there)
-            if ($can_delete) {
-               echo "<a href='" . $edit_url . "' title='" . __('Delete') . "'>";
-               echo "<i class='fas fa-trash-alt text-danger'></i>";
-               echo "</a>";
-            } else {
-               echo "<span title='" . __('Delete') . "' style='opacity:.4; cursor:not-allowed'><i class='fas fa-trash-alt'></i></span>";
-            }
-            echo "</td>";
-
-            echo "</tr>";
-         }
-      } else {
-         echo "<tr class='tab_bg_1'><td colspan='5' class='center'>" . __('No associate found', 'associatesmanager') . "</td></tr>";
-      }
-
-      echo "</table>";
-      echo "</div>";
-   }
-
-   /**
-    * Get search URL for the itemtype
-    *
-    * @param boolean $full path or relative one
-    *
-    * @return string
-    */
-   static function getSearchURL($full = true) {
-      return Plugin::getWebDir('associatesmanager', $full) . '/front/associate.php';
-   }
-
-   /**
-    * Get form URL for the itemtype
-    *
-    * @param boolean $full path or relative one
-    *
-    * @return string
-    */
-   static function getFormURL($full = true) {
-      return Plugin::getWebDir('associatesmanager', $full) . '/front/associate.form.php';
    }
 }
