@@ -47,9 +47,9 @@ function plugin_associatesmanager_install() {
       $DB->query($query) or die($DB->error());
    }
 
-   $table_partshistory = 'glpi_plugin_associatesmanager_partshistory';
-   if (!$DB->tableExists($table_partshistory)) {
-      $query = "CREATE TABLE IF NOT EXISTS `$table_partshistory` (
+   $table_partshistories = 'glpi_plugin_associatesmanager_partshistories';
+   if (!$DB->tableExists($table_partshistories)) {
+      $query = "CREATE TABLE IF NOT EXISTS `$table_partshistories` (
          `id` int $default_key_sign NOT NULL AUTO_INCREMENT,
          `plugin_associatesmanager_associates_id` int $default_key_sign NOT NULL DEFAULT '0',
          `plugin_associatesmanager_parts_id` int $default_key_sign NOT NULL DEFAULT '0',
@@ -95,7 +95,7 @@ function plugin_associatesmanager_uninstall() {
    $tables = [
       'glpi_plugin_associatesmanager_associates',
       'glpi_plugin_associatesmanager_parts',
-      'glpi_plugin_associatesmanager_partshistory',
+      'glpi_plugin_associatesmanager_partshistories',
       'glpi_plugin_associatesmanager_configs'
    ];
 
