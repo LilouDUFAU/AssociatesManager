@@ -76,6 +76,46 @@ class PluginAssociatesmanagerPart extends CommonDBTM {
       return $input;
    }
 
+   function getValueToDisplay($field, $values, $options = []) {
+      if ($field == 'libelle') {
+         return $values[$field];
+      }
+      return parent::getValueToDisplay($field, $values, $options);
+   }
+
+   static function dropdown($options = []) {
+      global $DB, $CFG_GLPI;
+
+      $p = [
+         'name'     => 'plugin_associatesmanager_parts_id',
+         'value'    => 0,
+         'comments' => true,
+         'entity'   => -1,
+         'entity_sons' => false,
+         'on_change' => '',
+         'width'    => '',
+      ];
+
+      if (is_array($options) && count($options)) {
+         foreach ($options as $key => $val) {
+            $p[$key] = $val;
+         }
+      }
+
+      $iterator = $DB->request([
+         'SELECT' => ['id', 'libelle', 'valeur'],
+         'FROM'   => 'glpi_plugin_associatesmanager_parts',
+         'ORDER'  => 'libelle'
+      ]);
+
+      $values = [0 => Dropdown::EMPTY_VALUE];
+      foreach ($iterator as $data) {
+         $values[$data['id']] = $data['libelle'] . ' (' . number_format($data['valeur'], 4, ',', ' ') . ' €)';
+      }
+
+      return Dropdown::showFromArray($p['name'], $values, $p);
+   }
+
    function rawSearchOptions() {
       $tab = parent::rawSearchOptions();
 
@@ -97,19 +137,5 @@ class PluginAssociatesmanagerPart extends CommonDBTM {
       ];
 
       return $tab;
-   }
-
-   /**
-    * Get search URL for the itemtype
-    */
-   static function getSearchURL($full = true) {
-      return Plugin::getWebDir('associatesmanager', $full) . '/front/part.php';
-   }
-
-   /**
-    * Get form URL for the itemtype
-    */
-   static function getFormURL($full = true) {
-      return Plugin::getWebDir('associatesmanager', $full) . '/front/part.form.php';
    }
 }
