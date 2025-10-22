@@ -1,7 +1,30 @@
 # Changelog - Associates Manager
 
 Toutes les modifications importantes de ce projet seront documentées dans ce fichier.
+## [1.0.6] - 2025-10-22
 
+### Ajouté
+- Export CSV pour les listes d'associés et de parts
+- Indicateur visuel du statut d'activité sur la liste des associés
+- Tests unitaires basiques pour les fonctions de recherche
+- Option de tri persistante entre les sessions utilisateur
+- Fonction dropdown pour la sélection des parts dans les formulaires/listes
+
+### Modifié
+- Optimisation des requêtes de recherche pour réduire la charge et le temps de réponse
+- Amélioration des messages d'erreur et des confirmations UX (cohérence visuelle)
+- Mise à jour des traductions françaises et ajout de clés manquantes
+- Refactor léger des contrôleurs front pour clarifier les responsabilités
+- Renommage de la table et des références de partshistory en partshistories (schéma et code mis à jour)
+
+### Corrigé
+- Correction de la pagination affichant des entrées en double
+- Correction d'un problème de permissions empêchant la suppression des parts
+- Correction d'une fuite mémoire lors de l'export CSV
+- Correction d'un cas où la création de contact ne remplissait pas certains champs obligatoires
+- Fix de compatibilité PHP 8.2 pour quelques appels de fonctions dépréciées
+- Résolution du problème empêchant la sélection des parts (intégration du dropdown)
+- Divers ajustements mineurs de stabilité et de compatibilité
 
 ## [1.0.5] - 2025-10-20
 
