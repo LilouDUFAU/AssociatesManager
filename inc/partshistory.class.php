@@ -41,15 +41,15 @@ class PluginAssociatesmanagerPartshistory extends CommonDBTM {
 
       $iterator = $DB->request([
          'SELECT' => [
-            'glpi_plugin_associatesmanager_partshistory.*',
+            'glpi_plugin_associatesmanager_partshistories.*',
             'glpi_plugin_associatesmanager_parts.libelle',
             'glpi_plugin_associatesmanager_parts.valeur'
          ],
-         'FROM'  => 'glpi_plugin_associatesmanager_partshistory',
+         'FROM'  => 'glpi_plugin_associatesmanager_partshistories',
          'LEFT JOIN' => [
             'glpi_plugin_associatesmanager_parts' => [
                'ON' => [
-                  'glpi_plugin_associatesmanager_partshistory' => 'plugin_associatesmanager_parts_id',
+                  'glpi_plugin_associatesmanager_partshistories' => 'plugin_associatesmanager_parts_id',
                   'glpi_plugin_associatesmanager_parts' => 'id'
                ]
             ]
