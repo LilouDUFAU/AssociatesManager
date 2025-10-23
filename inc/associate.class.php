@@ -52,7 +52,7 @@ class PluginAssociatesmanagerAssociate extends CommonDBTM {
          echo "</div>";
 
          echo "<div class='center firstbloc'>";
-         echo "<a class='btn btn-primary' href='" . Plugin::getWebDir('associatesmanager') . "/front/parts.form.php?suppliers_id=$supplier_id'>";
+         echo "<a class='btn btn-primary' href='" . Plugin::getWebDir('associatesmanager') . "/front/part.form.php?suppliers_id=$supplier_id'>";
          echo __('Add a part', 'associatesmanager');
          echo "</a>";
          echo "</div>";
