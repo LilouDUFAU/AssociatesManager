@@ -1,6 +1,28 @@
 # Changelog - Associates Manager
 
 Toutes les modifications importantes de ce projet seront documentées dans ce fichier.
+## [1.1.0] - 2025-10-23
+
+### Ajouté
+- Classe d'installation `inc/install.class.php` centralisant l'installation, la désinstallation et les migrations
+- Fichiers SQL de schéma et de désinstallation (`install/mysql/plugin_associatesmanager_1.0_empty.sql`, `install/mysql/plugin_associatesmanager_uninstall.sql`)
+- Utilisation de l'API sécurisée `$DB->runFile()` pour l'exécution des scripts SQL lors de l'installation
+
+### Modifié
+- Refactor de `hook.php` pour déléguer l'installation/désinstallation à la classe `Install`
+- Mise à jour du schéma SQL pour utiliser des clés primaires/étrangères `unsigned` (conformité GLPI 11)
+- Gestion des droits de profil : utilisation de `ProfileRight::updateProfileRights()` pour éviter les entrées dupliquées
+- Ajout de la constante de version de schéma dans `setup.php` (`PLUGIN_ASSOCIATESMANAGER_SCHEMA_VERSION`)
+- Correction des signatures de méthodes (ex. `inc/config.class.php`) pour la compatibilité GLPI 11
+
+### Corrigé
+- Erreur critique "Executing direct queries is not allowed!" lors de l'installation (utilisation de `runFile`)
+- Problème de `Duplicate entry` sur `glpi_profilerights` lors de l'installation
+- Erreur fatale liée aux signatures de méthode incompatibles avec GLPI 11
+
+### Divers
+- Vérifications de syntaxe PHP (`php -l`) effectuées sur les fichiers modifiés
+
 ## [1.0.6] - 2025-10-22
 
 ### Ajouté
