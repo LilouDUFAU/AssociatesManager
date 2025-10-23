@@ -1,7 +1,10 @@
 <?php
 
-define('PLUGIN_ASSOCIATESMANAGER_VERSION', '1.0.6');
-define('PLUGIN_ASSOCIATESMANAGER_MIN_GLPI', '10.0.0');
+define('PLUGIN_ASSOCIATESMANAGER_VERSION', '1.1.0');
+// Schema version used for DB migrations (major.minor)
+define('PLUGIN_ASSOCIATESMANAGER_SCHEMA_VERSION', '1.0');
+define('PLUGIN_ASSOCIATESMANAGER_MIN_GLPI', '11.0.0');
+define('PLUGIN_ASSOCIATESMANAGER_MAX_GLPI', '11.99.99');
 
 // Autoloader for plugin classes
 spl_autoload_register(function ($classname) {
@@ -56,6 +59,7 @@ function plugin_version_associatesmanager() {
       'requirements'   => [
          'glpi' => [
             'min' => PLUGIN_ASSOCIATESMANAGER_MIN_GLPI,
+            'max' => PLUGIN_ASSOCIATESMANAGER_MAX_GLPI
          ]
       ]
    ];
@@ -64,6 +68,10 @@ function plugin_version_associatesmanager() {
 function plugin_associatesmanager_check_prerequisites() {
    if (version_compare(GLPI_VERSION, PLUGIN_ASSOCIATESMANAGER_MIN_GLPI, 'lt')) {
       echo "This plugin requires GLPI >= " . PLUGIN_ASSOCIATESMANAGER_MIN_GLPI;
+      return false;
+   }
+   if (version_compare(GLPI_VERSION, PLUGIN_ASSOCIATESMANAGER_MAX_GLPI, 'gt')) {
+      echo "This plugin does not support GLPI > " . PLUGIN_ASSOCIATESMANAGER_MAX_GLPI;
       return false;
    }
    return true;
