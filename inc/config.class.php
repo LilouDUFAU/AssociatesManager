@@ -8,19 +8,19 @@ class PluginAssociatesmanagerConfig extends CommonDBTM {
 
    static protected $notable = true;
 
-   static function canView() {
+   public static function canView(): bool {
       return Session::haveRight('config', READ);
    }
 
-   static function canCreate() {
+   public static function canCreate(): bool {
       return Session::haveRight('config', UPDATE);
    }
 
-   static function getTypeName($nb = 0) {
+   public static function getTypeName($nb = 0): string {
       return __('Configuration', 'associatesmanager');
    }
 
-   function showConfigForm() {
+   public function showConfigForm(): bool {
       global $CFG_GLPI;
 
       if (!Session::haveRight('config', READ)) {
@@ -51,7 +51,7 @@ class PluginAssociatesmanagerConfig extends CommonDBTM {
       Html::closeForm();
       echo "</div>";
 
-      return true;
+   return true;
    }
 
    function showProfileRights() {
