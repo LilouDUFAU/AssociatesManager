@@ -1,10 +1,7 @@
 <?php
 
-require '../../../inc/includes.php';
+require_once __DIR__ . '/../../../inc/includes.php';
 
-if (!class_exists('Event')) {
-   echo '<div style=\"color:red\">Event class not loaded!</div>';
-}
 
 Session::checkLoginUser();
 Session::checkRight('plugin_associatesmanager', READ);
@@ -18,7 +15,7 @@ if (isset($_POST['add'])) {
    }
    $associate->check(-1, CREATE, $_POST);
    if ($newID = $associate->add($_POST)) {
-      Session::addMessageAfterRedirect(__('Associate successfully created', 'associatesmanager'), true, INFO);
+   Session::addMessageAfterRedirect('Associé créé avec succès', true, INFO);
       Html::redirect(Plugin::getWebDir('associatesmanager') . '/front/associate.php');
    }
    Html::back();
@@ -26,19 +23,19 @@ if (isset($_POST['add'])) {
 } else if (isset($_POST['update'])) {
    $associate->check($_POST['id'], UPDATE);
    $associate->update($_POST);
-   Session::addMessageAfterRedirect(__('Associate successfully updated', 'associatesmanager'), true, INFO);
+   Session::addMessageAfterRedirect('Associé mis à jour avec succès', true, INFO);
    Html::redirect(Plugin::getWebDir('associatesmanager') . '/front/associate.php');
 
 } else if (isset($_POST['delete'])) {
    $associate->check($_POST['id'], DELETE);
    $associate->delete($_POST);
-   Session::addMessageAfterRedirect(__('Associate successfully deleted', 'associatesmanager'), true, INFO);
+   Session::addMessageAfterRedirect('Associé supprimé avec succès', true, INFO);
    Html::redirect(Plugin::getWebDir('associatesmanager') . '/front/associate.php');
 
 } else if (isset($_POST['purge'])) {
    $associate->check($_POST['id'], PURGE);
    $associate->delete($_POST, 1);
-   Session::addMessageAfterRedirect(__('Associate successfully purged', 'associatesmanager'), true, INFO);
+   Session::addMessageAfterRedirect('Associé purgé avec succès', true, INFO);
    Html::redirect(Plugin::getWebDir('associatesmanager') . '/front/associate.php');
 
 } else {

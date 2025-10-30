@@ -1,6 +1,6 @@
 <?php
 
-require '../../../inc/includes.php';
+require_once __DIR__ . '/../../../inc/includes.php';
 
 Session::checkLoginUser();
 Session::checkRight('plugin_associatesmanager', READ);
