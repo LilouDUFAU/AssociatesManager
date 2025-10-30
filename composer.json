@@ -1,0 +1,12 @@
+{
+  "name": "associatesmanager/plugin",
+  "description": "AssociatesManager plugin - tests scaffolding",
+  "require-dev": {
+    "phpunit/phpunit": "^9.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "AssociatesManager\\Tests\\": "tests/"
+    }
+  }
+}

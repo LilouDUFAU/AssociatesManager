@@ -2,7 +2,7 @@
 
 define('PLUGIN_ASSOCIATESMANAGER_VERSION', '1.1.0');
 // Schema version used for DB migrations (major.minor)
-define('PLUGIN_ASSOCIATESMANAGER_SCHEMA_VERSION', '1.0');
+define('PLUGIN_ASSOCIATESMANAGER_SCHEMA_VERSION', '2.0');
 define('PLUGIN_ASSOCIATESMANAGER_MIN_GLPI', '11.0.0');
 define('PLUGIN_ASSOCIATESMANAGER_MAX_GLPI', '11.99.99');
 
@@ -28,6 +28,22 @@ function plugin_init_associatesmanager() {
    $plugin = new Plugin();
 
    if ($plugin->isInstalled('associatesmanager') && $plugin->isActivated('associatesmanager')) {
+      // Force plugin UI to French for all users if translations are available.
+      // This binds the gettext domain for the plugin to the local `locale/` folder
+      // and forces the locale to fr_FR where possible.
+      $localeDir = __DIR__ . '/locale';
+      if (function_exists('bindtextdomain')) {
+         // Bind domain and set UTF-8
+         bindtextdomain('associatesmanager', $localeDir);
+         if (function_exists('bind_textdomain_codeset')) {
+            bind_textdomain_codeset('associatesmanager', 'UTF-8');
+         }
+         textdomain('associatesmanager');
+      }
+      // Try to set the locale to French (best-effort)
+      if (function_exists('setlocale')) {
+         setlocale(LC_ALL, 'fr_FR.UTF-8', 'fr_FR', 'fr');
+      }
       Plugin::registerClass('PluginAssociatesmanagerAssociate', [
          'addtabon' => ['Supplier']
       ]);
@@ -35,7 +51,8 @@ function plugin_init_associatesmanager() {
       Plugin::registerClass('PluginAssociatesmanagerPart');
       Plugin::registerClass('PluginAssociatesmanagerPartshistory');
 
-      $PLUGIN_HOOKS['menu_toadd']['associatesmanager'] = ['admin' => 'PluginAssociatesmanagerMenu'];
+   // Place the plugin under the 'Gestion' (management) menu instead of 'Administration'
+   $PLUGIN_HOOKS['menu_toadd']['associatesmanager'] = ['management' => 'PluginAssociatesmanagerMenu'];
 
       if (Session::haveRight('plugin_associatesmanager', READ)) {
          $PLUGIN_HOOKS['menu_entry']['associatesmanager'] = 'front/associate.php';
@@ -51,7 +68,7 @@ function plugin_init_associatesmanager() {
 
 function plugin_version_associatesmanager() {
    return [
-      'name'           => __('Associates Manager', 'associatesmanager'),
+   'name'           => 'Gestion des associés',
       'version'        => PLUGIN_ASSOCIATESMANAGER_VERSION,
       'author'         => 'Lilou DUFAU',
       'license'        => 'GPLv2+',
