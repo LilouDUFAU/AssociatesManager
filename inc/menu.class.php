@@ -9,7 +9,7 @@ class PluginAssociatesmanagerMenu extends CommonGLPI {
    static $rightname = 'plugin_associatesmanager';
 
    static function getMenuName() {
-      return __('Associates Manager', 'associatesmanager');
+   return 'Gestion des associés';
    }
 
    static function getMenuContent() {

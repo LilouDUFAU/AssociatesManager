@@ -9,14 +9,15 @@ class PluginAssociatesmanagerPartshistory extends CommonDBTM {
    static $rightname = 'plugin_associatesmanager';
 
    static function getTypeName($nb = 0) {
-      return _n('Parts History', 'Parts History', $nb, 'associatesmanager');
+   return ($nb > 1) ? 'Historique des parts' : 'Historique des parts';
    }
 
    function getTabNameForItem(CommonGLPI $item, $withtemplate = 0) {
       if ($item->getType() == 'PluginAssociatesmanagerAssociate') {
          if ($_SESSION['glpishow_count_on_tabs']) {
+            // history table stores associate id under plugin_associatesmanager_associates_id
             $nb = countElementsInTable(
-               $this->getTable(),
+               static::getTable(),
                ['plugin_associatesmanager_associates_id' => $item->getID()]
             );
             return self::createTabEntry(self::getTypeName(Session::getPluralNumber()), $nb);
@@ -39,29 +40,19 @@ class PluginAssociatesmanagerPartshistory extends CommonDBTM {
       $associate_id = $associate->getID();
       $canedit = Session::haveRight('plugin_associatesmanager', UPDATE);
 
+      // History is stored in the partshistories table; join to parts to get labels/values
       $iterator = $DB->request([
-         'SELECT' => [
-            'glpi_plugin_associatesmanager_partshistories.*',
-            'glpi_plugin_associatesmanager_parts.libelle',
-            'glpi_plugin_associatesmanager_parts.valeur'
-         ],
-         'FROM'  => 'glpi_plugin_associatesmanager_partshistories',
-         'LEFT JOIN' => [
-            'glpi_plugin_associatesmanager_parts' => [
-               'ON' => [
-                  'glpi_plugin_associatesmanager_partshistories' => 'plugin_associatesmanager_parts_id',
-                  'glpi_plugin_associatesmanager_parts' => 'id'
-               ]
-            ]
-         ],
-         'WHERE' => ['plugin_associatesmanager_associates_id' => $associate_id],
-         'ORDER' => ['date_attribution DESC']
+         'SELECT' => ['ph.*', 'p.libelle', 'p.valeur'],
+         'FROM'  => 'glpi_plugin_associatesmanager_partshistories AS ph',
+         'LEFT JOIN' => ['glpi_plugin_associatesmanager_parts AS p' => ['p.id' => 'ph.plugin_associatesmanager_parts_id']],
+         'WHERE' => ['ph.plugin_associatesmanager_associates_id' => $associate_id],
+         'ORDER' => ['ph.date_attribution DESC']
       ]);
 
       if ($canedit) {
          echo "<div class='center firstbloc'>";
-         echo "<a class='btn btn-primary' href='" . Plugin::getWebDir('associatesmanager') . "/front/partshistory.form.php?plugin_associatesmanager_associates_id=$associate_id'>";
-         echo __('Add a parts entry', 'associatesmanager');
+         echo "<a class='btn btn-primary' href='" . Plugin::getWebDir('associatesmanager') . "/front/partshistory.form.php?associates_id=$associate_id'>";
+         echo 'Ajouter une entrée d\'historique';
          echo "</a>";
          echo "</div>";
       }
@@ -71,31 +62,40 @@ class PluginAssociatesmanagerPartshistory extends CommonDBTM {
          echo "<table class='tab_cadre_fixehov'>";
          echo "<tr class='noHover'><th colspan='6'>" . self::getTypeName(count($iterator)) . "</th></tr>";
          echo "<tr>";
-         echo "<th>" . __('Part', 'associatesmanager') . "</th>";
-         echo "<th>" . __('Number of parts', 'associatesmanager') . "</th>";
-         echo "<th>" . __('Unit Value', 'associatesmanager') . "</th>";
-         echo "<th>" . __('Total Value', 'associatesmanager') . "</th>";
-         echo "<th>" . __('Attribution Date', 'associatesmanager') . "</th>";
-         echo "<th>" . __('End Date', 'associatesmanager') . "</th>";
+         echo "<th>Part</th>";
+         echo "<th>Nombre de parts</th>";
+         echo "<th>Valeur unitaire</th>";
+         echo "<th>Valeur totale</th>";
+         echo "<th>Date d'attribution</th>";
+         echo "<th>Date de fin</th>";
          echo "</tr>";
 
          $total = 0;
          foreach ($iterator as $data) {
-            $total_value = $data['nbparts'] * $data['valeur'];
+            // unit value may have been removed from parts table in older schema
+            $unit_value = isset($data['valeur']) ? (float)$data['valeur'] : 0.0;
+            $total_value = (float)$data['nbparts'] * $unit_value;
             $total += $total_value;
 
             echo "<tr class='tab_bg_1'>";
-            echo "<td>" . $data['libelle'] . "</td>";
+            // libelle may come from the joined parts table
+            $label = $data['libelle'] ?? '';
+            echo "<td>" . $label . "</td>";
             echo "<td>" . number_format($data['nbparts'], 4, ',', ' ') . "</td>";
-            echo "<td>" . number_format($data['valeur'], 4, ',', ' ') . " €</td>";
-            echo "<td>" . number_format($total_value, 2, ',', ' ') . " €</td>";
+            if ($unit_value != 0.0) {
+               echo "<td>" . number_format($unit_value, 4, ',', ' ') . " €</td>";
+               echo "<td>" . number_format($total_value, 2, ',', ' ') . " €</td>";
+            } else {
+               echo "<td>-</td>";
+               echo "<td>-</td>";
+            }
             echo "<td>" . Html::convDate($data['date_attribution']) . "</td>";
             echo "<td>" . Html::convDate($data['date_fin']) . "</td>";
             echo "</tr>";
          }
 
          echo "<tr class='tab_bg_2'>";
-         echo "<td colspan='3' class='right'><strong>" . __('Total', 'associatesmanager') . "</strong></td>";
+         echo "<td colspan='3' class='right'><strong>Total</strong></td>";
          echo "<td><strong>" . number_format($total, 2, ',', ' ') . " €</strong></td>";
          echo "<td colspan='2'></td>";
          echo "</tr>";
@@ -103,7 +103,7 @@ class PluginAssociatesmanagerPartshistory extends CommonDBTM {
          echo "</table>";
       } else {
          echo "<table class='tab_cadre_fixe'>";
-         echo "<tr><th>" . __('No parts history found', 'associatesmanager') . "</th></tr>";
+         echo "<tr><th>Aucun historique de parts trouvé</th></tr>";
          echo "</table>";
       }
       echo "</div>";
@@ -116,6 +116,12 @@ class PluginAssociatesmanagerPartshistory extends CommonDBTM {
       return $ong;
    }
 
+      // Use the dedicated history table for historical records
+      // Must be static to match CommonDBTM::getTable() signature
+      public static function getTable($classname = null) {
+         return 'glpi_plugin_associatesmanager_partshistories';
+      }
+
    function showForm($ID, array $options = []) {
       if ($ID > 0) {
          $this->check($ID, READ);
@@ -126,37 +132,37 @@ class PluginAssociatesmanagerPartshistory extends CommonDBTM {
       $this->showFormHeader($options);
 
       echo "<tr class='tab_bg_1'>";
-      echo "<td>" . __('Associate', 'associatesmanager') . " *</td>";
+   echo "<td>Associé *</td>";
       echo "<td>";
-      PluginAssociatesmanagerAssociate::dropdown([
-         'name' => 'plugin_associatesmanager_associates_id',
-         'value' => $this->fields['plugin_associatesmanager_associates_id']
+        PluginAssociatesmanagerAssociate::dropdown([
+          'name' => 'associates_id',
+          'value' => $this->fields['associates_id'] ?? 0
       ]);
       echo "</td>";
 
-      echo "<td>" . __('Part', 'associatesmanager') . " *</td>";
+   echo "<td>Part *</td>";
       echo "<td>";
       PluginAssociatesmanagerPart::dropdown([
-         'name' => 'plugin_associatesmanager_parts_id',
-         'value' => $this->fields['plugin_associatesmanager_parts_id']
+         'name' => 'parts_id',
+         'value' => $this->fields['parts_id'] ?? 0
       ]);
       echo "</td>";
       echo "</tr>";
 
       echo "<tr class='tab_bg_1'>";
-      echo "<td>" . __('Number of parts', 'associatesmanager') . " *</td>";
+   echo "<td>Nombre de parts *</td>";
       echo "<td>";
       echo Html::input('nbparts', ['value' => $this->fields['nbparts'], 'type' => 'number', 'step' => '0.0001']);
       echo "</td>";
 
-      echo "<td>" . __('Attribution Date', 'associatesmanager') . " *</td>";
+   echo "<td>Date d'attribution *</td>";
       echo "<td>";
       Html::showDateField('date_attribution', ['value' => $this->fields['date_attribution']]);
       echo "</td>";
       echo "</tr>";
 
       echo "<tr class='tab_bg_1'>";
-      echo "<td>" . __('End Date', 'associatesmanager') . "</td>";
+   echo "<td>Date de fin</td>";
       echo "<td>";
       Html::showDateField('date_fin', ['value' => $this->fields['date_fin']]);
       echo "</td>";
@@ -169,23 +175,33 @@ class PluginAssociatesmanagerPartshistory extends CommonDBTM {
    }
 
    function prepareInputForAdd($input) {
-      if (empty($input['plugin_associatesmanager_associates_id'])) {
-         Session::addMessageAfterRedirect(__('Associate is mandatory', 'associatesmanager'), false, ERROR);
+             // Require the standardized associates_id field
+             if (empty($input['associates_id'])) {
+         Session::addMessageAfterRedirect('L\'associé est obligatoire', false, ERROR);
+         return false;
+      }
+            if (empty($input['parts_id'])) {
+         Session::addMessageAfterRedirect('La part est obligatoire', false, ERROR);
          return false;
       }
 
-      if (empty($input['plugin_associatesmanager_parts_id'])) {
-         Session::addMessageAfterRedirect(__('Part is mandatory', 'associatesmanager'), false, ERROR);
-         return false;
-      }
+         // Map standardized form fields to legacy DB column names used in history table
+         if (isset($input['parts_id'])) {
+            $input['plugin_associatesmanager_parts_id'] = $input['parts_id'];
+            unset($input['parts_id']);
+         }
+         if (isset($input['associates_id'])) {
+            $input['plugin_associatesmanager_associates_id'] = $input['associates_id'];
+            unset($input['associates_id']);
+         }
 
       if (!isset($input['nbparts']) || $input['nbparts'] === '') {
-         Session::addMessageAfterRedirect(__('Number of parts is mandatory', 'associatesmanager'), false, ERROR);
+         Session::addMessageAfterRedirect('Le nombre de parts est obligatoire', false, ERROR);
          return false;
       }
 
       if (empty($input['date_attribution'])) {
-         Session::addMessageAfterRedirect(__('Attribution date is mandatory', 'associatesmanager'), false, ERROR);
+         Session::addMessageAfterRedirect('La date d\'attribution est obligatoire', false, ERROR);
          return false;
       }
 
@@ -200,42 +216,44 @@ class PluginAssociatesmanagerPartshistory extends CommonDBTM {
       $tab = parent::rawSearchOptions();
 
       $tab[] = [
-         'id'                 => '2',
+         'id'                 => '21021',
          'table'              => 'glpi_plugin_associatesmanager_associates',
          'field'              => 'name',
-         'name'               => __('Associate', 'associatesmanager'),
+         'name'               => 'Associé',
          'datatype'           => 'dropdown',
+         'linkfield'          => 'associates_id',
+         'jointype'           => 'LEFT',
       ];
 
       $tab[] = [
-         'id'                 => '3',
-         'table'              => 'glpi_plugin_associatesmanager_parts',
+         'id'                 => '21022',
+         'table'              => static::getTable(),
          'field'              => 'libelle',
-         'name'               => __('Part', 'associatesmanager'),
+         'name'               => 'Part',
          'datatype'           => 'dropdown',
       ];
 
       $tab[] = [
-         'id'                 => '4',
-         'table'              => $this->getTable(),
+         'id'                 => '21023',
+         'table'              => static::getTable(),
          'field'              => 'nbparts',
-         'name'               => __('Number of parts', 'associatesmanager'),
+         'name'               => 'Nombre de parts',
          'datatype'           => 'decimal',
       ];
 
       $tab[] = [
-         'id'                 => '5',
-         'table'              => $this->getTable(),
+         'id'                 => '21024',
+         'table'              => static::getTable(),
          'field'              => 'date_attribution',
-         'name'               => __('Attribution Date', 'associatesmanager'),
+         'name'               => 'Date d\'attribution',
          'datatype'           => 'date',
       ];
 
       $tab[] = [
-         'id'                 => '6',
-         'table'              => $this->getTable(),
+         'id'                 => '21025',
+         'table'              => static::getTable(),
          'field'              => 'date_fin',
-         'name'               => __('End Date', 'associatesmanager'),
+         'name'               => 'Date de fin',
          'datatype'           => 'date',
       ];
 

@@ -16,15 +16,44 @@ class Install {
 
       $migration->displayMessage("Installing Associates Manager plugin");
 
-      // Execute SQL schema file if exists using runFile (allowed in migration context)
-      $sqlFile = __DIR__ . '/../install/mysql/plugin_associatesmanager_1.0_empty.sql';
-      if (is_readable($sqlFile)) {
-         if (!$DB->runFile($sqlFile)) {
-            $migration->displayWarning("Error creating tables: " . $DB->error(), true);
-            return false;
+      // Execute SQL schema files found in install/mysql in lexicographic order.
+      // This allows incremental schema files like plugin_associatesmanager_1.0_empty.sql,
+      // plugin_associatesmanager_2.0_schema.sql, etc. Each file should be idempotent
+      // (use IF NOT EXISTS / ALTER ... statements).
+      $sqlDir = __DIR__ . '/../install/mysql';
+      if (is_dir($sqlDir)) {
+         $files = scandir($sqlDir);
+         sort($files, SORT_STRING);
+         foreach ($files as $file) {
+            // Skip uninstall and non-sql files
+            if (stripos($file, 'plugin_associatesmanager_') !== 0) {
+               continue;
+            }
+            if (stripos($file, 'uninstall') !== false) {
+               continue;
+            }
+            $path = $sqlDir . '/' . $file;
+            if (!is_readable($path) || pathinfo($path, PATHINFO_EXTENSION) !== 'sql') {
+               continue;
+            }
+            $migration->displayMessage('Applying SQL file: ' . $file);
+            if (!$DB->runFile($path)) {
+               $migration->displayWarning("Error executing $file: " . $DB->error(), true);
+               return false;
+            }
+         }
+
+         // Apply additional idempotent SQL apply file (safe, run via runFile)
+         $applyFile = $sqlDir . '/plugin_associatesmanager_2.0_apply.sql';
+         if (is_readable($applyFile)) {
+            $migration->displayMessage('Applying DB updates from ' . basename($applyFile));
+            if (!$DB->runFile($applyFile)) {
+               $migration->displayWarning('Error executing ' . basename($applyFile) . ': ' . $DB->error(), true);
+               return false;
+            }
          }
       } else {
-         $migration->displayMessage("No SQL schema file found, using programmatic creation.");
+         $migration->displayMessage("No SQL directory found, using programmatic creation.");
       }
 
       // Register/ensure profile rights for central profiles

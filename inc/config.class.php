@@ -17,7 +17,7 @@ class PluginAssociatesmanagerConfig extends CommonDBTM {
    }
 
    public static function getTypeName($nb = 0): string {
-      return __('Configuration', 'associatesmanager');
+   return 'Configuration';
    }
 
    public function showConfigForm(): bool {
@@ -31,12 +31,12 @@ class PluginAssociatesmanagerConfig extends CommonDBTM {
       echo "<form method='post' action='" . Plugin::getWebDir('associatesmanager') . "/front/config.form.php'>";
 
       echo "<table class='tab_cadre_fixe'>";
-      echo "<tr><th colspan='2'>" . __('Associates Manager Configuration', 'associatesmanager') . "</th></tr>";
+   echo "<tr><th colspan='2'>Configuration du plugin Associates Manager</th></tr>";
 
       echo "<tr class='tab_bg_1'>";
       echo "<td colspan='2'>";
-      echo "<h3>" . __('Rights Management', 'associatesmanager') . "</h3>";
-      echo "<p>" . __('Manage plugin rights through GLPI profiles (Administration > Profiles)', 'associatesmanager') . "</p>";
+   echo "<h3>Gestion des droits</h3>";
+   echo "<p>Gérer les droits du plugin via les profils GLPI (Administration > Profils)</p>";
       echo "</td>";
       echo "</tr>";
 
@@ -55,12 +55,12 @@ class PluginAssociatesmanagerConfig extends CommonDBTM {
    }
 
    function showProfileRights() {
-      global $DB;
+      global $DB, $CFG_GLPI;
 
       echo "<table class='tab_cadre_fixehov'>";
       echo "<tr>";
-      echo "<th>" . __('Profile') . "</th>";
-      echo "<th>" . __('Rights') . "</th>";
+   echo "<th>Profil</th>";
+   echo "<th>Droits</th>";
       echo "</tr>";
 
       $iterator = $DB->request([
@@ -83,10 +83,10 @@ class PluginAssociatesmanagerConfig extends CommonDBTM {
       ]);
 
       $rights_values = [
-         READ    => __('Read'),
-         CREATE  => __('Create'),
-         UPDATE  => __('Update'),
-         PURGE   => __('Delete'),
+         READ    => 'Lecture',
+         CREATE  => 'Création',
+         UPDATE  => 'Modification',
+         PURGE   => 'Suppression',
       ];
 
       foreach ($iterator as $data) {
@@ -103,11 +103,12 @@ class PluginAssociatesmanagerConfig extends CommonDBTM {
             }
             echo implode(', ', $active_rights);
          } else {
-            echo __('None');
+            echo 'Aucun';
          }
 
-         echo " <a href='" . $CFG_GLPI['root_doc'] . "/front/profile.form.php?id=" . $data['id'] . "' class='btn btn-sm btn-primary'>";
-         echo "<i class='fas fa-edit'></i> " . __('Edit');
+         $root_doc = is_array($CFG_GLPI) && isset($CFG_GLPI['root_doc']) ? $CFG_GLPI['root_doc'] : '';
+         echo " <a href='" . $root_doc . "/front/profile.form.php?id=" . $data['id'] . "' class='btn btn-sm btn-primary'>";
+         echo "<i class='fas fa-edit'></i> Modifier";
          echo "</a>";
 
          echo "</td>";
@@ -117,12 +118,12 @@ class PluginAssociatesmanagerConfig extends CommonDBTM {
       echo "</table>";
 
       echo "<div class='center' style='margin-top: 20px;'>";
-      echo "<p><strong>" . __('Available rights:', 'associatesmanager') . "</strong></p>";
+   echo "<p><strong>Droits disponibles : </strong></p>";
       echo "<ul style='text-align: left; display: inline-block;'>";
-      echo "<li><strong>" . __('Read') . ":</strong> " . __('View associates, parts and history', 'associatesmanager') . "</li>";
-      echo "<li><strong>" . __('Create') . ":</strong> " . __('Add new associates, parts and history entries', 'associatesmanager') . "</li>";
-      echo "<li><strong>" . __('Update') . ":</strong> " . __('Modify existing associates, parts and history', 'associatesmanager') . "</li>";
-      echo "<li><strong>" . __('Delete') . ":</strong> " . __('Remove associates, parts and history', 'associatesmanager') . "</li>";
+   echo "<li><strong>Lecture :</strong> Voir les associés, parts et historiques</li>";
+   echo "<li><strong>Création :</strong> Ajouter des associés, parts et entrées d'historique</li>";
+   echo "<li><strong>Modification :</strong> Modifier des associés, parts et historiques</li>";
+   echo "<li><strong>Suppression :</strong> Supprimer des associés, parts et historiques</li>";
       echo "</ul>";
       echo "</div>";
    }
