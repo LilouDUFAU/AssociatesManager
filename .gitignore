@@ -1,0 +1,61 @@
+# Node / JS
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Composer / PHP
+/vendor/
+/composer.lock
+/.idea/
+/.vscode/
+/.phpunit.result.cache
+/.php_cs.cache
+/.php_cs
+/.phpunit
+
+# Logs and temp
+*.log
+*.cache
+tmp/
+cache/
+*.pid
+
+# Built assets
+dist/
+build/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Localization files (we moved to in-code strings)
+locale/
+*.po
+*.mo
+
+# Tests
+coverage/
+phpunit.xml
+
+# Environment
+.env
+.env.local
+
+# Misc
+*.swp
+*.swo
+*.bak
+*.orig
+
+# IDE
+.vscode/
+.idea/
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# Allow publishing specific files
+!README.md
+!CHANGELOG.md
+!LICENSE
