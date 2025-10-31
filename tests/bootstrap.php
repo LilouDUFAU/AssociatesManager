@@ -40,7 +40,6 @@ $base = __DIR__ . '/../inc/';
 $files = [
     'associate.class.php',
     'part.class.php',
-    'partshistory.class.php',
     'config.class.php'
 ];
 foreach ($files as $f) {
