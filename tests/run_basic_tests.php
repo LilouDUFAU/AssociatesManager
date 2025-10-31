@@ -6,7 +6,7 @@ $errors = [];
 $classes = [
     'PluginAssociatesmanagerAssociate',
     'PluginAssociatesmanagerPart',
-    'PluginAssociatesmanagerPartshistory'
+    // Partshistory class removed - history is now stored in parts table
 ];
 
 foreach ($classes as $c) {
