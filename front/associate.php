@@ -16,10 +16,18 @@ Html::header(
 // Add "New" button in header if user has CREATE right
 if (Session::haveRight('plugin_associatesmanager', CREATE)) {
    echo "<div class='spaced'>";
-   echo "<a href='" . PluginAssociatesmanagerAssociate::getFormURL() . "' class='btn btn-primary'>";
+   echo "<a href='" . PluginAssociatesmanagerAssociate::getFormURL() . "' class='btn btn-primary' style='margin-right:8px;'>";
    echo "<i class='fas fa-plus'></i> ";
    echo "<span>Nouvel associé</span>";
    echo "</a>";
+   // Also add a button to view the full parts history
+   if (Session::haveRight('plugin_associatesmanager', READ)) {
+      // Link to the Parts page which now exposes the full history view
+      echo "<a href='" . Plugin::getWebDir('associatesmanager') . "/front/part.php' class='btn btn-secondary'>";
+      echo "<i class='fas fa-history'></i> ";
+      echo "<span>Voir l'historique des parts</span>";
+      echo "</a>";
+   }
    echo "</div>";
 }
 
@@ -36,6 +44,7 @@ $pairs = []; // key supplier|associate => nbparts sum
 $supplierTotals = []; // supplier_id => total nbparts
 $assocIds = [];
 $supplierIds = [];
+$pairDates = []; // key supplier|associate => ['date_attribution'=>..., 'date_fin'=>...]
 
 foreach ($it as $r) {
    $sid = $r['supplier_id'];
@@ -46,6 +55,16 @@ foreach ($it as $r) {
       $pairs[$key] = 0.0;
    }
    $pairs[$key] += $nb;
+
+   // Track the attribution/fin dates for the duo. For safety keep the most recent
+   // date_attribution if multiple rows exist (shouldn't for active rows but be robust).
+   if (!isset($pairDates[$key]) || empty($pairDates[$key]['date_attribution']) ||
+       strtotime($r['date_attribution']) > strtotime($pairDates[$key]['date_attribution'])) {
+      $pairDates[$key] = [
+         'date_attribution' => $r['date_attribution'] ?? null,
+         'date_fin' => $r['date_fin'] ?? null
+      ];
+   }
 
    if (!isset($supplierTotals[$sid])) {
       $supplierTotals[$sid] = 0.0;
@@ -106,7 +125,7 @@ if (count($pairs)) {
    echo "<button id='sort-pct' class='btn btn-sm btn-light' data-order='desc'>Tri % ↓</button> ";
    echo "</div>";
    echo "<table class='tab_cadre_fixehov'>";
-   echo "<tr class='noHover'><th colspan='9'>Associés - parts par fournisseur</th></tr>";
+   echo "<tr class='noHover'><th colspan='11'>Associés - parts par fournisseur</th></tr>";
    echo "<tr>";
    echo "<th>Nom</th>";
    echo "<th>Type</th>";
@@ -115,6 +134,8 @@ if (count($pairs)) {
    echo "<th>Ville</th>";
    echo "<th>Nombre de parts</th>";
    echo "<th>Part (%)</th>";
+      echo "<th>Date d'attribution</th>";
+      echo "<th>Date de fin</th>";
    echo "<th>Fournisseur associé</th>";
    echo "<th>Actions</th>";
    echo "</tr>";
@@ -130,7 +151,9 @@ if (count($pairs)) {
       $pct = ($supplierTotal > 0) ? ($nb / $supplierTotal * 100.0) : 0.0;
 
    // add data attributes for client-side filtering/sorting
-   echo "<tr class='tab_bg_1' data-supplier='" . $sid . "' data-assoc='" . $aid . "' data-type='" . ($assoc ? $assoc['is_person'] : '') . "' data-nb='" . $nb . "' data-pct='" . $pct . "'>";
+   $da = $pairDates[$key]['date_attribution'] ?? '';
+   $df = $pairDates[$key]['date_fin'] ?? '';
+   echo "<tr class='tab_bg_1' data-supplier='" . $sid . "' data-assoc='" . $aid . "' data-type='" . ($assoc ? $assoc['is_person'] : '') . "' data-nb='" . $nb . "' data-pct='" . $pct . "' data-date_attribution='" . ($da ?: '') . "' data-date_fin='" . ($df ?: '') . "'>";
       if ($assoc) {
          echo "<td><a href='" . Plugin::getWebDir('associatesmanager') . "/front/associate.form.php?id=" . $assoc['id'] . "'>" . htmlspecialchars($assoc['name']) . "</a></td>";
             echo "<td>" . ($assoc['is_person'] ? 'Personne' : 'Société') . "</td>";
@@ -144,6 +167,8 @@ if (count($pairs)) {
 
          echo "<td class='left'>" . number_format($nb, 2, ',', ' ') . "</td>";
             echo "<td class='left'>" . sprintf('%.1f', $pct) . "%</td>";
+            echo "<td>" . Html::convDate($da) . "</td>";
+            echo "<td>" . Html::convDate($df) . "</td>";
          // Link to GLPI supplier page (core Supplier) instead of plugin supplier form
          $supplier_url = '/front/supplier.form.php?id=' . $sid;
          if (class_exists('Supplier') && method_exists('Supplier', 'getFormURL')) {
