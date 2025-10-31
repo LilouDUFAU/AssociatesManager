@@ -33,11 +33,8 @@ class PluginAssociatesmanagerMenu extends CommonGLPI {
          'icon'  => 'fas fa-percentage'
       ];
 
-      $menu['options']['partshistory'] = [
-         'title' => PluginAssociatesmanagerPartshistory::getTypeName(Session::getPluralNumber()),
-         'page'  => Plugin::getWebDir('associatesmanager') . '/front/partshistory.php',
-         'icon'  => 'fas fa-history'
-      ];
+      // The dedicated partshistory page/class was removed; history is available
+      // from the Parts list and associate views.
 
       return $menu;
    }
