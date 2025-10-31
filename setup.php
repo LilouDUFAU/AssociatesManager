@@ -1,6 +1,6 @@
 <?php
 
-define('PLUGIN_ASSOCIATESMANAGER_VERSION', '1.1.0');
+define('PLUGIN_ASSOCIATESMANAGER_VERSION', '1.1.1');
 // Schema version used for DB migrations (major.minor)
 define('PLUGIN_ASSOCIATESMANAGER_SCHEMA_VERSION', '2.0');
 define('PLUGIN_ASSOCIATESMANAGER_MIN_GLPI', '11.0.0');
