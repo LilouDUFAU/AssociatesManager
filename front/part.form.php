@@ -14,7 +14,13 @@ if (isset($_POST['add'])) {
    }
    $part->check(-1, CREATE, $_POST);
    if ($newID = $part->add($_POST)) {
-      // Always redirect to the list after creation
+      // If supplier_id was provided, return to the supplier page the user came from
+      if (!empty($_POST['supplier_id'])) {
+         $sid = (int)$_POST['supplier_id'];
+         // Redirect to GLPI supplier form page
+         Html::redirect('/front/supplier.form.php?id=' . $sid);
+      }
+      // Fallback: redirect to the parts list
       Html::redirect(Plugin::getWebDir('associatesmanager') . '/front/part.php');
    }
    Html::back();
