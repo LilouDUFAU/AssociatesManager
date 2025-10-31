@@ -30,19 +30,9 @@ CREATE TABLE IF NOT EXISTS `glpi_plugin_associatesmanager_parts` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 
-CREATE TABLE IF NOT EXISTS `glpi_plugin_associatesmanager_partshistories` (
-  `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `plugin_associatesmanager_associates_id` int unsigned NOT NULL DEFAULT '0',
-  `plugin_associatesmanager_parts_id` int unsigned NOT NULL DEFAULT '0',
-  `nbparts` decimal(15,4) NOT NULL DEFAULT '0.0000',
-  `date_attribution` date DEFAULT NULL,
-  `date_fin` date DEFAULT NULL,
-  `date_creation` timestamp NULL DEFAULT NULL,
-  `date_mod` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `plugin_associatesmanager_associates_id` (`plugin_associatesmanager_associates_id`),
-  KEY `plugin_associatesmanager_parts_id` (`plugin_associatesmanager_parts_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+-- Historical per-associate entries are now stored in the main `parts` table
+-- (historical rows are kept by setting `date_fin`). The separate
+-- `partshistories` table has been removed in this version.
 
 CREATE TABLE IF NOT EXISTS `glpi_plugin_associatesmanager_configs` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
