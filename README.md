@@ -53,10 +53,9 @@ chmod -R 755 associatesmanager
 - Affichage des informations principales : nom, fournisseur, nombre de parts
 
 ### Base de données
-Le plugin crée 3 tables principales :
+Le plugin crée 2 tables principales :
 - `glpi_plugin_associatesmanager_associates` : Informations sur les associés
-- `glpi_plugin_associatesmanager_parts` : Définition des types de parts
-- `glpi_plugin_associatesmanager_partshistory` : Historique des attributions de parts
+- `glpi_plugin_associatesmanager_parts` : Définition des types de parts et historique des attributions (les enregistrements historiques sont conservés dans cette table via le champ `date_fin`)
 
 #### 2. Types d'associés possibles
 
@@ -82,15 +81,13 @@ Le plugin crée 3 tables principales :
 │   ├── 📄 associate.php
 │   ├── 📄 config.form.php
 │   ├── 📄 part.form.php
-│   ├── 📄 part.php
-│   ├── 📄 partshistory.form.php
-│   └── 📄 partshistory.php
+│   └── 📄 part.php
 ├── 📁 inc/
 │   ├── 📄 associate.class.php
 │   ├── 📄 config.class.php
 │   ├── 📄 menu.class.php
 │   ├── 📄 part.class.php
-│   └── 📄 partshistory.class.php
+│   └── 📄 part.class.php
 └── 📁 locale/
    └── 📄 fr_FR.po
 ```
