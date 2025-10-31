@@ -53,6 +53,7 @@ class PluginAssociatesmanagerAssociate extends CommonDBTM {
       // Récupère les parts actives pour ce fournisseur et calcule les totaux en PHP
       $assocParts = [];
       $totalParts = 0;
+      $assocDates = []; // associate_id => ['date_attribution'=>..., 'date_fin'=>...]
       $it = $DB->request([
          'FROM'  => 'glpi_plugin_associatesmanager_parts',
          'WHERE' => [
@@ -68,6 +69,15 @@ class PluginAssociatesmanagerAssociate extends CommonDBTM {
          }
          $assocParts[$aid] += $nb;
          $totalParts += $nb;
+         // Track dates for the active assignment for this associate on this supplier.
+         // If multiple rows exist (unlikely for active rows) keep the most recent attribution.
+         if (!isset($assocDates[$aid]) || empty($assocDates[$aid]['date_attribution']) ||
+             strtotime($r['date_attribution']) > strtotime($assocDates[$aid]['date_attribution'])) {
+            $assocDates[$aid] = [
+               'date_attribution' => $r['date_attribution'] ?? null,
+               'date_fin' => $r['date_fin'] ?? null
+            ];
+         }
       }
 
       $assocIds = array_keys($assocParts);
@@ -79,14 +89,21 @@ class PluginAssociatesmanagerAssociate extends CommonDBTM {
          ]);
       }
 
+      // Action buttons: add part + view history (shown side-by-side)
+      echo "<div class='spaced'>";
       if ($canedit) {
-         echo "<div class='spaced'>";
-         echo "<a class='btn btn-primary' href='" . Plugin::getWebDir('associatesmanager') . "/front/part.form.php?supplier_id=$supplier_id'>";
+         echo "<a class='btn btn-primary mr-2' href='" . Plugin::getWebDir('associatesmanager') . "/front/part.form.php?supplier_id=$supplier_id'>";
          echo "<i class='fas fa-plus'></i> ";
          echo '<span>Ajouter une part</span>';
          echo "</a>";
-         echo "</div>";
       }
+      if (Session::haveRight('plugin_associatesmanager', READ)) {
+         echo "<a class='btn btn-secondary' href='" . Plugin::getWebDir('associatesmanager') . "/front/part.php?supplier_id=$supplier_id'>";
+         echo "<i class='fas fa-history'></i> ";
+         echo '<span>Voir l\'historique</span>';
+         echo "</a>";
+      }
+      echo "</div>";
 
       // Workaround: cancel AJAX requests to the tag plugin endpoint which may be unreachable
       // This prevents console errors like GET https://plugins/tag/ajax/get_entity_tags.php net::ERR_NAME_NOT_RESOLVED
@@ -97,7 +114,7 @@ class PluginAssociatesmanagerAssociate extends CommonDBTM {
       echo "<div class='center'>";
       if (count($iterator)) {
          echo "<table class='tab_cadre_fixehov'>";
-         echo "<tr class='noHover'><th colspan='8'>" . self::getTypeName(count($iterator)) . "</th></tr>";
+         echo "<tr class='noHover'><th colspan='10'>" . self::getTypeName(count($iterator)) . "</th></tr>";
          echo "<tr>";
          echo "<th>Nom</th>";
          echo "<th>Type</th>";
@@ -106,6 +123,8 @@ class PluginAssociatesmanagerAssociate extends CommonDBTM {
          echo "<th>Ville</th>";
          echo "<th>Nombre de parts</th>";
          echo "<th>Part (%)</th>";
+         echo "<th>Date d'attribution</th>";
+         echo "<th>Date de fin</th>";
          echo "<th>Actions</th>";
          echo "</tr>";
 
@@ -122,6 +141,11 @@ class PluginAssociatesmanagerAssociate extends CommonDBTM {
             // Pourcentage de parts représenté
             $pct = ($totalParts > 0) ? ($nb / $totalParts * 100) : 0;
             echo "<td class='left'>" . sprintf('%.1f', $pct) . "%</td>";
+            // Dates
+            $da = $assocDates[$data['id']]['date_attribution'] ?? '';
+            $df = $assocDates[$data['id']]['date_fin'] ?? '';
+            echo "<td>" . Html::convDate($da) . "</td>";
+            echo "<td>" . Html::convDate($df) . "</td>";
             echo "<td>";
             if ($canedit) {
                echo "<a href='" . Plugin::getWebDir('associatesmanager') . "/front/associate.form.php?id=" . $data['id'] . "'>";
@@ -143,7 +167,7 @@ class PluginAssociatesmanagerAssociate extends CommonDBTM {
    function defineTabs($options = []) {
       $ong = [];
       $this->addDefaultFormTab($ong);
-      $this->addStandardTab('PluginAssociatesmanagerPartshistory', $ong, $options);
+   // Historical tab removed (history is available via Parts list)
       $this->addStandardTab('Log', $ong, $options);
       return $ong;
    }
