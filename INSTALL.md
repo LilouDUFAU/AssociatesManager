@@ -126,7 +126,6 @@ Vous devez voir :
 ```
 glpi_plugin_associatesmanager_associates
 glpi_plugin_associatesmanager_parts
-glpi_plugin_associatesmanager_partshistory
 glpi_plugin_associatesmanager_configs
 ```
 
@@ -249,10 +248,9 @@ mysql -u root -p -e "USE glpi_db; SHOW TABLES LIKE 'glpi_plugin_associatesmanage
 1. **Sauvegarder les données**
 ```bash
 mysqldump -u root -p glpi_db \
-  glpi_plugin_associatesmanager_associates \
-  glpi_plugin_associatesmanager_parts \
-  glpi_plugin_associatesmanager_partshistory \
-  > backup_associatesmanager.sql
+   glpi_plugin_associatesmanager_associates \
+   glpi_plugin_associatesmanager_parts \
+   > backup_associatesmanager.sql
 ```
 
 2. **Désactiver le plugin**
