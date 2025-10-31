@@ -93,7 +93,6 @@ class Install {
          $tables = [
             'glpi_plugin_associatesmanager_associates',
             'glpi_plugin_associatesmanager_parts',
-            'glpi_plugin_associatesmanager_partshistories',
             'glpi_plugin_associatesmanager_configs'
          ];
 
