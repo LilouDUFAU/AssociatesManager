@@ -1,6 +1,19 @@
 # Changelog - Associates Manager
 
 Toutes les modifications importantes de ce projet seront documentées dans ce fichier.
+\n+> Note: à partir de la version 1.1.0+ l'entité `partshistory` a été supprimée et
+> l'historique des attributions de parts est désormais conservé dans la table
+> `glpi_plugin_associatesmanager_parts` via le champ `date_fin`. Les anciennes
+> références à `partshistory` dans la documentation et le code ont été nettoyées.
+
+## [Unreleased] - 2025-10-30
+
+### Ajouté
+- Scaffolding des tests unitaires : `tests/bootstrap.php`, `tests/run_basic_tests.php` et configuration PHPUnit (`phpunit.xml.dist`)
+- `composer.json` ajouté pour la gestion des dépendances et l'autoload
+- `tmp_strings.txt` ajouté (chaînes de traduction extraites)
+- Mise à jour de `setup.php` pour intégrer l'autoload / préparation de l'environnement de test
+
 ## [1.1.0] - 2025-10-23
 
 ### Ajouté
