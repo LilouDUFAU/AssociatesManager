@@ -48,8 +48,7 @@ function plugin_init_associatesmanager() {
          'addtabon' => ['Supplier']
       ]);
 
-      Plugin::registerClass('PluginAssociatesmanagerPart');
-      Plugin::registerClass('PluginAssociatesmanagerPartshistory');
+   Plugin::registerClass('PluginAssociatesmanagerPart');
 
    // Place the plugin under the 'Gestion' (management) menu instead of 'Administration'
    $PLUGIN_HOOKS['menu_toadd']['associatesmanager'] = ['management' => 'PluginAssociatesmanagerMenu'];
