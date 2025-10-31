@@ -224,27 +224,41 @@ class PluginAssociatesmanagerPart extends CommonDBTM {
       // Begin transaction: we'll move existing active part to history, then insert new part
       $DB->beginTransaction();
 
-      // Find the current active part for this associate+supplier (date_fin IS NULL)
-      $existing = $DB->request([
-         'SELECT' => ['id','date_attribution'],
+   // Debug: record invocation to plugin debug log to help diagnose missing updates
+   $logfile = __DIR__ . '/../associatesmanager_debug.log';
+   $entry = "addPart called: associates_id={$data['associates_id']}, supplier_id={$data['supplier_id']}, date_attribution={$data['date_attribution']}\n";
+   file_put_contents($logfile, $entry, FILE_APPEND | LOCK_EX);
+
+      // Find the current active part for this associate+supplier.
+      // Some rows may have date_fin = NULL, empty string or '0000-00-00' depending on imports/SQL mode.
+      $existing = null;
+      $itExisting = $DB->request([
+         'SELECT' => ['id','date_attribution','date_fin'],
          'FROM'   => 'glpi_plugin_associatesmanager_parts',
          'WHERE'  => [
             'associates_id' => $data['associates_id'],
-            'supplier_id'   => $data['supplier_id'],
-            'date_fin'      => null
+            'supplier_id'   => $data['supplier_id']
          ],
          'ORDER' => 'date_attribution DESC'
-      ])->next();
+      ]);
+      foreach ($itExisting as $er) {
+         $df = $er['date_fin'] ?? null;
+         if ($df === null || trim((string)$df) === '' || $df === '0000-00-00') {
+            $existing = $er;
+            break;
+         }
+      }
 
+      // If an active existing part is found, close it by setting date_fin = new date_attribution
       if (!empty($existing)) {
          // Validate dates: new attribution must be >= existing attribution
-         if (strtotime($data['date_attribution']) < strtotime($existing['date_attribution'])) {
+         if (!empty($existing['date_attribution']) && strtotime($data['date_attribution']) < strtotime($existing['date_attribution'])) {
             Session::addMessageAfterRedirect('La date d\'attribution doit être postérieure ou égale à la date d\'attribution existante', false, ERROR);
             $DB->rollback();
             return false;
          }
 
-         // Set date_fin on existing to the new attribution date (keep historical row in parts table)
+         // Update existing row. Use $this->update (CommonDBTM) which will handle history logging; if it fails, rollback.
          if (!$this->update(['id' => $existing['id'], 'date_fin' => $data['date_attribution'], 'date_mod' => date('Y-m-d H:i:s')])) {
             $DB->rollback();
             return false;
@@ -322,36 +336,12 @@ class PluginAssociatesmanagerPart extends CommonDBTM {
          return false;
       }
 
-      // Begin transaction: set date_fin, copy to history, delete from parts
+      // Begin transaction: set date_fin on the existing row and keep it in the
+      // parts table as part of the historical records. We no longer copy rows
+      // to a separate history table.
       $DB->beginTransaction();
 
-      // Update date_fin (so history row keeps correct end date)
       if (!$this->update(['id' => $existing['id'], 'date_fin' => $date_fin, 'date_mod' => date('Y-m-d H:i:s')])) {
-         $DB->rollback();
-         return false;
-      }
-
-      // Copy to history
-      if (class_exists('PluginAssociatesmanagerPartshistory')) {
-         $hist = new PluginAssociatesmanagerPartshistory();
-         $histData = [
-            'plugin_associatesmanager_associates_id' => $existing['associates_id'] ?? 0,
-            'plugin_associatesmanager_parts_id'      => $existing['id'],
-            'nbparts'                                => $existing['nbparts'],
-            'date_attribution'                       => $existing['date_attribution'],
-            'date_fin'                               => $date_fin,
-            'date_creation'                          => $existing['date_creation'] ?? date('Y-m-d H:i:s'),
-            'date_mod'                               => date('Y-m-d H:i:s')
-         ];
-         $histId = $hist->add($histData, [], false);
-         if (!$histId) {
-            $DB->rollback();
-            return false;
-         }
-      }
-
-      // Delete from parts
-      if (!$this->delete($existing['id'])) {
          $DB->rollback();
          return false;
       }
@@ -395,24 +385,29 @@ class PluginAssociatesmanagerPart extends CommonDBTM {
       if (empty($date)) {
          $date = date('Y-m-d');
       }
-      // Sum parts for associate where date_attribution <= date and (date_fin IS NULL OR date_fin > date)
-      $assocSum = $DB->request([
-         'SELECT' => ['SUM(nbparts) AS s'],
-         'FROM'   => 'glpi_plugin_associatesmanager_parts',
-         'WHERE'  => [
+
+      // Sum parts for the associate on that supplier
+      $a = 0.0;
+      $it = $DB->request([
+         'FROM'  => 'glpi_plugin_associatesmanager_parts',
+         'WHERE' => [
             'associates_id' => $associate_id,
             'supplier_id'   => $supplier_id
          ]
-      ])->next();
+      ]);
+      foreach ($it as $r) {
+         $a += isset($r['nbparts']) ? (float)$r['nbparts'] : 0.0;
+      }
 
-      $totalSum = $DB->request([
-         'SELECT' => ['SUM(nbparts) AS s'],
-         'FROM'   => 'glpi_plugin_associatesmanager_parts',
-         'WHERE'  => ['supplier_id' => $supplier_id]
-      ])->next();
-
-      $a = isset($assocSum['s']) ? (float)$assocSum['s'] : 0.0;
-      $t = isset($totalSum['s']) ? (float)$totalSum['s'] : 0.0;
+      // Sum total parts for that supplier
+      $t = 0.0;
+      $it2 = $DB->request([
+         'FROM'  => 'glpi_plugin_associatesmanager_parts',
+         'WHERE' => ['supplier_id' => $supplier_id]
+      ]);
+      foreach ($it2 as $r) {
+         $t += isset($r['nbparts']) ? (float)$r['nbparts'] : 0.0;
+      }
 
       if ($t == 0.0) {
          return 0.0;
